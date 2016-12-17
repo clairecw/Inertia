@@ -8,6 +8,7 @@ int currentWeight = -1;
 ArrayList<Obj> objects = new ArrayList<Obj>();
 ArrayList<Obj> currentObjects = new ArrayList<Obj>();
 float m = 0;
+float prevTime = 0;
 
 // CONSTANTS //
 static float G = 9.81;    // gravitational constant 
@@ -50,7 +51,7 @@ class Weight extends Element {
     ogY = yPos = y;
     size = 20;
     switch (m) {
-      case 10: size = 10; break;
+      case 100: size = 10; break;
       case 200: size = 20; break;
       case 500: size = 25; break;
       case 1000: size = 30; break;
@@ -63,13 +64,12 @@ class Weight extends Element {
   }
   
   void move() {
-    vel += accel/1000;
-    yPos += vel;
+    vel += accel / 10;
+    yPos += vel * .56;
     if (yPos >= 400) {
       moving = false;
       finished = true;
     }
-    delay(10);
   }
   
 }
@@ -139,7 +139,7 @@ void setup() {
   hollowSphereImg = loadImage("hollow.png");
   ringImg = loadImage("ring.png");
   
-  blue = new Weight(10, 91, 149, 245, 598, 400);
+  blue = new Weight(100, 91, 149, 245, 598, 400);
   pink = new Weight(200, 245, 91, 235, 620, 400);
   green = new Weight(500, 86, 255, 41, 650, 400);
   red = new Weight(1000, 255, 41, 56, 690, 400);
@@ -208,16 +208,16 @@ void draw() {
   if (finished) {
     textSize(16);
     fill(0);
-    text("Average acceleration: " + accel, 500, 515);
-  }
-  
-  if (moving) weights.get(currentWeight).move();
-  for (int i = 0; i < weights.size(); i++) {
-    weights.get(i).display();
+    text("Average acceleration: " + round(accel*10000)/10000.0 + " m/s^2", 480, 515);
   }
   
   for (int i = 0; i < objects.size(); i++) {
     objects.get(i).display();
+  }
+  
+  if (moving && tick()) weights.get(currentWeight).move();
+  for (int i = 0; i < weights.size(); i++) {
+    weights.get(i).display();
   }
 }
 
@@ -234,6 +234,15 @@ void release() {
   m = weights.get(currentWeight).mass/1000;
   accel = G*m*R*R/(m*R*R+I);
   moving = true;
+  prevTime = millis();
+}
+
+boolean tick() {    // true if 0.01 seconds passed since start of timer or since last tick.
+  if (millis() - prevTime >= 100) {
+    prevTime = millis();
+    return true;
+  }
+  return false;
 }
 
 void mousePressed() {
