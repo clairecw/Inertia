@@ -19,6 +19,7 @@ PImage hollowSphereImg;
 PImage ringImg;
 
 boolean moving = false;   // system in motion or not.
+boolean finished = false; // system finished one round of movement.
 
 class Element {
   float ogX, ogY;    // object's original position.
@@ -66,10 +67,7 @@ class Weight extends Element {
     yPos += vel;
     if (yPos >= 400) {
       moving = false;
-      textSize(18);
-      fill(0);
-      print(accel);
-      text("Average acceleration: " + accel, 800, 515);
+      finished = true;
     }
     delay(10);
   }
@@ -163,6 +161,15 @@ void setup() {
 void draw() {
   background(240);
   
+  if (moving) weights.get(currentWeight).move();
+  for (int i = 0; i < weights.size(); i++) {
+    weights.get(i).display();
+  }
+  
+  for (int i = 0; i < objects.size(); i++) {
+    objects.get(i).display();
+  }
+  
   fill(41, 242, 2);
   stroke(41, 242, 2);
   ellipse(505, 75, 10, 10);
@@ -206,7 +213,13 @@ void draw() {
     line(500, 70, w.xPos, w.yPos);
     
   }
-    
+  
+  if (finished) {
+    textSize(16);
+    fill(0);
+    text("Average acceleration: " + accel, 500, 515);
+  }
+  
   if (moving) weights.get(currentWeight).move();
   for (int i = 0; i < weights.size(); i++) {
     weights.get(i).display();
@@ -217,8 +230,12 @@ void draw() {
   }
 }
 
-void release() {
+  void release() {
   if (currentWeight < 0) return;
+  if (finished) {
+    weights.get(currentWeight).vel = 0;
+    finished = false;
+  }
   float I = I0;
   for (int i = 0; i < currentObjects.size(); i++) {
     I += currentObjects.get(i).inertia;
