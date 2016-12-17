@@ -211,17 +211,17 @@ void draw() {
     text("Average acceleration: " + accel, 500, 515);
   }
   
-  for (int i = 0; i < objects.size(); i++) {
-    objects.get(i).display();
-  }
-  
   if (moving) weights.get(currentWeight).move();
   for (int i = 0; i < weights.size(); i++) {
     weights.get(i).display();
   }
+  
+  for (int i = 0; i < objects.size(); i++) {
+    objects.get(i).display();
+  }
 }
 
-  void release() {
+void release() {
   if (currentWeight < 0) return;
   if (finished) {
     weights.get(currentWeight).vel = 0;
@@ -263,7 +263,6 @@ void mouseClicked() {
         currentWeight = i;
         w.xPos = 500;
         w.yPos = 100;
-        release();
       }
     }
   }
