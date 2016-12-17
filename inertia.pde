@@ -159,7 +159,7 @@ void setup() {
 }
 
 void draw() {
-  background(240);
+  background(255);
   
   fill(41, 242, 2);
   stroke(41, 242, 2);
