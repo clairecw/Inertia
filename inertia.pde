@@ -161,15 +161,6 @@ void setup() {
 void draw() {
   background(240);
   
-  if (moving) weights.get(currentWeight).move();
-  for (int i = 0; i < weights.size(); i++) {
-    weights.get(i).display();
-  }
-  
-  for (int i = 0; i < objects.size(); i++) {
-    objects.get(i).display();
-  }
-  
   fill(41, 242, 2);
   stroke(41, 242, 2);
   ellipse(505, 75, 10, 10);
@@ -227,6 +218,15 @@ void draw() {
   
   for (int i = 0; i < objects.size(); i++) {
     objects.get(i).display();
+  }
+  
+  for (int i = 0; i < objects.size(); i++) {
+    objects.get(i).display();
+  }
+  
+  if (moving) weights.get(currentWeight).move();
+  for (int i = 0; i < weights.size(); i++) {
+    weights.get(i).display();
   }
 }
 
