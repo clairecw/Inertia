@@ -263,6 +263,7 @@ void mouseClicked() {
         currentWeight = i;
         w.xPos = 500;
         w.yPos = 100;
+        release();
       }
     }
   }
