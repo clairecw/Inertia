@@ -1,12 +1,27 @@
+import java.util.*;
+
 Weight blue, pink, green, red;        // hanging masses
 Obj solidSphere, hollowSphere, ring;  // objects (to be put on plate)
 Obj pm1, pm2, pm3, pm4;
 
+int[][] snapPoints = new int[][]{
+  {150, 150},
+  {50, 150},
+  {100, 150},
+  {200, 150},
+  {250, 150},
+  {150, 50},
+  {150, 100},
+  {150, 200},
+  {150, 250}
+};
+
 ArrayList<Weight> weights = new ArrayList<Weight>();
 float accel = 0;
 int currentWeight = -1;
+int draggedObject = -1;
 ArrayList<Obj> objects = new ArrayList<Obj>();
-ArrayList<Obj> currentObjects = new ArrayList<Obj>();
+ArrayList<Obj> selectedObjects = new ArrayList<Obj>();
 float m = 0;
 float prevTime = 0;
 
@@ -60,6 +75,7 @@ class Weight extends Element {
   
   void display() {
     fill(R, G, B);
+    stroke(0);
     ellipse(xPos, yPos, size, size);
   }
   
@@ -76,7 +92,7 @@ class Weight extends Element {
 
 class Obj extends Element {
   float inertia;
-  int mass;
+  float mass;
   float radius;
   
   int type;
@@ -85,7 +101,7 @@ class Obj extends Element {
   // 2 = hollow sphere
   // 3 = ring
   
-  Obj(int x, int y, int t, int m) {
+  Obj(int x, int y, int t, float m) {
     ogX = xPos = x;
     ogY = yPos = y;
     type = t;
@@ -95,7 +111,7 @@ class Obj extends Element {
   void display() {
     switch (type) {
       case 0: 
-        switch (mass) {  
+        switch ((int)(mass*1000)) {  
           case 56: 
             fill(54, 255, 41);
             stroke(54, 255, 41);
@@ -129,6 +145,75 @@ class Obj extends Element {
         size = 100;
         break;
     }
+    if (selectedObjects.contains(this) && draggedObject == -1) {
+      int x = 0;
+      switch ((int)(xPos + size/2)) {
+        case 50: x = 520; break;
+        case 100: x = 520 + 66; break;
+        case 150: x = 520 + 66*2; break;
+        case 200: x = 520 + 66*3; break;
+        case 250: x = 520 + 66*4; break;
+      }
+      switch (type) {
+        case 0: 
+          switch ((int)(mass*1000)) {  
+            case 56: 
+              fill(54, 255, 41);
+              stroke(54, 255, 41);
+              break;
+            case 250: 
+              fill(255, 41, 56);
+              stroke(255, 41, 56);
+              break;
+            case 500: 
+              fill(44, 41, 255);
+              stroke(44, 41, 255);
+              break;
+            case 1000:
+              fill(45, 165, 13);
+              stroke(45, 165, 13);
+              break;
+          }
+          ellipse(x, 52, 5, 5);
+          break;
+        case 1:
+          image(solidSphereImg, x, 35, 20, 20);
+          break;
+        case 2:
+          image(hollowSphereImg, x, 35, 20, 20);
+          break;
+        case 3:
+          fill(153, 204, 155);
+          stroke(153, 204, 155);
+          rect(x - 60, 45, 140, 9);
+          break;
+      }
+    }
+  }
+  
+  void move() {
+    if (type == 0) {
+      xPos = mouseX;
+      yPos = mouseY;
+    }
+    else {
+      xPos = mouseX - size/2;
+      yPos = mouseY - size/2;
+    }
+  }
+  
+  float inertia() {
+    switch (type) {
+      case 0: 
+        return mass*radius*radius;
+      case 1:
+        return 0.0005 + mass*radius*radius;    // ???
+      case 2:
+        return 0.000833 + mass*radius*radius;  // ???
+      case 3:
+        return 0.015625 + mass*radius*radius;  // ???
+    }
+    return 0;
   }
 }
 
@@ -139,46 +224,69 @@ void setup() {
   hollowSphereImg = loadImage("hollow.png");
   ringImg = loadImage("ring.png");
   
-  blue = new Weight(100, 91, 149, 245, 598, 400);
-  pink = new Weight(200, 245, 91, 235, 620, 400);
-  green = new Weight(500, 86, 255, 41, 650, 400);
-  red = new Weight(1000, 255, 41, 56, 690, 400);
+  blue = new Weight(100, 91, 149, 245, 590, 400);
+  pink = new Weight(200, 245, 91, 235, 640, 400);
+  green = new Weight(500, 86, 255, 41, 700, 400);
+  red = new Weight(1000, 255, 41, 56, 765, 400);
   
   weights.add(blue);
   weights.add(pink);
   weights.add(green);
   weights.add(red);
   
-  solidSphere = new Obj(30, 400, 1, 10);
-  hollowSphere = new Obj(80, 400, 2, 10);
-  ring = new Obj(130, 380, 3, 10);
+  solidSphere = new Obj(30, 400, 1, 0.5);
+  hollowSphere = new Obj(110, 400, 2, 0.5);
+  ring = new Obj(190, 380, 3, 10);
   
+  objects.add(ring);
   objects.add(solidSphere);
   objects.add(hollowSphere);
-  objects.add(ring);
+  objects.add(new Obj(50, 350, 0, 0.25));
+  objects.add(new Obj(90, 350, 0, 0.056));
+  objects.add(new Obj(130, 350, 0, 0.5));
+  objects.add(new Obj(170, 350, 0, 1));
 }
 
 void draw() {
   background(240);
   
+  textSize(11);
+  fill(0);
+  text("100g", 575, 440);
+  text("200g", 625, 440);
+  text("500g", 685, 440);
+  text("1000g", 750, 440);
+  
+  text("Solid\nSphere", 35, 460);
+  text("Hollow\nSphere", 110, 460);
+  text("Ring", 230, 435);
+  
   fill(41, 242, 2);
   stroke(41, 242, 2);
   ellipse(505, 75, 10, 10);
   
-  stroke(0);
+  stroke(0);        // rotating plate
   fill(255);
   ellipse(150, 150, 200, 200);
   
-  fill(0);                    // stick points for objects on the plate
-  ellipse(150, 150, 5, 5);
-  ellipse(50, 150, 5, 5);
-  ellipse(100, 150, 5, 5);
-  ellipse(200, 150, 5, 5);
-  ellipse(250, 150, 5, 5);
-  ellipse(150, 50, 5, 5);
-  ellipse(150, 100, 5, 5);
-  ellipse(150, 200, 5, 5);
-  ellipse(150, 250, 5, 5);
+  stroke(255, 0, 0);
+  if (moving) {
+    
+  }
+  else {
+    line(150, 150, 250, 150);
+    fill(0);                    // snap points for objects on the plate
+    stroke(0);
+    ellipse(150, 150, 5, 5);
+    ellipse(50, 150, 5, 5);
+    ellipse(100, 150, 5, 5);
+    ellipse(200, 150, 5, 5);
+    ellipse(250, 150, 5, 5);
+    ellipse(150, 50, 5, 5);
+    ellipse(150, 100, 5, 5);
+    ellipse(150, 200, 5, 5);
+    ellipse(150, 250, 5, 5);
+  }
   
   stroke(0);
   fill(255);
@@ -208,10 +316,11 @@ void draw() {
   if (finished) {
     textSize(16);
     fill(0);
-    text("Average acceleration: " + round(accel*10000)/10000.0 + " m/s^2", 480, 515);
+    text("Average acceleration: " + round(accel*10000)/10000.0 + " m/s^2", 500, 515);
   }
   
   for (int i = 0; i < objects.size(); i++) {
+    if (i == draggedObject) objects.get(i).move();
     objects.get(i).display();
   }
   
@@ -228,8 +337,9 @@ void release() {
     finished = false;
   }
   float I = I0;
-  for (int i = 0; i < currentObjects.size(); i++) {
-    I += currentObjects.get(i).inertia;
+  for (int i = 0; i < selectedObjects.size(); i++) {
+    I += selectedObjects.get(i).inertia();
+    //println(selectedObjects.get(i).inertia());
   }
   m = weights.get(currentWeight).mass/1000;
   accel = G*m*R*R/(m*R*R+I);
@@ -246,10 +356,77 @@ boolean tick() {    // true if 0.01 seconds passed since start of timer or since
 }
 
 void mousePressed() {
+  for (int i = 0; i < objects.size(); i++) {
+    Obj o = objects.get(i);
+    if (o.over()) {
+      draggedObject = i;
+    }
+  }
+}
+
+void mouseReleased() {
+  HashSet temp = new HashSet(selectedObjects);
+  selectedObjects.clear();
+  selectedObjects.addAll(temp);
   
+  if (draggedObject > -1) {
+    Obj o = objects.get(draggedObject);
+    for (int i = 0; i < snapPoints.length; i++) {
+      float xc1, xc2, yc1, yc2;
+      if (o.type == 0) {
+        xc1 = o.xPos - o.size / 2;
+        xc2 = o.xPos + o.size / 2;
+        yc1 = o.yPos - o.size / 2;
+        yc2 = o.yPos + o.size / 2;
+      }
+      else {
+        xc1 = o.xPos;
+        xc2 = o.xPos + o.size;
+        yc1 = o.yPos;
+        yc2 = o.yPos + o.size;
+      }
+      if (xc1 < snapPoints[i][0] && xc2 + o.size > snapPoints[i][0]
+          && yc1 < snapPoints[i][1] && yc2 + o.size > snapPoints[i][1]) {
+        if (o.type == 3) {
+          if (snapPoints[i][0] == 50 || snapPoints[i][0] == 250 
+              || snapPoints[i][1] == 50 || snapPoints[i][1] == 250) {
+              o.xPos = o.ogX;
+              o.yPos = o.ogY;
+              selectedObjects.remove(o);
+              draggedObject = -1;
+              return;
+          }
+        }
+        if (o.type == 0) {
+          o.xPos = snapPoints[i][0];
+          o.yPos = snapPoints[i][1];
+        }
+        else {
+          o.xPos = snapPoints[i][0] - o.size / 2;
+          o.yPos = snapPoints[i][1] - o.size / 2;
+        }
+        selectedObjects.add(o);
+        o.radius = (snapPoints[i][0] - 150 + snapPoints[i][1] - 150) * 0.0025;
+        draggedObject = -1;
+        return;
+      }
+    }
+    o.xPos = o.ogX;
+    o.yPos = o.ogY;
+    selectedObjects.remove(o);
+    for (int i = 0; i < selectedObjects.size(); i++) {
+      print(selectedObjects.get(i).type);
+      if (selectedObjects.get(i).xPos == selectedObjects.get(i).ogX
+          && selectedObjects.get(i).yPos == selectedObjects.get(i).ogY)
+          selectedObjects.remove(i);
+    }
+    println();
+    draggedObject = -1;
+  }
 }
 
 void mouseClicked() {
+  if (moving) return;
   if (mouseX >= 860 && mouseX <= 940 
       && mouseY >= 500 && mouseY <= 520) {
         release();
