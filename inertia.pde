@@ -1,16 +1,14 @@
-import java.util.*;
-
 Weight blue, pink, green, red;        // hanging masses
 Obj solidSphere, hollowSphere, ring;  // objects (to be put on plate)
 Obj pm1, pm2, pm3, pm4;
 
 int[][] snapPoints = new int[][]{
-  {150, 150},
+  {150, 50},
   {50, 150},
+  {150, 150},
   {100, 150},
   {200, 150},
   {250, 150},
-  {150, 50},
   {150, 100},
   {150, 200},
   {150, 250}
@@ -296,7 +294,8 @@ void draw() {
   
   fill(0);
   textSize(12);
-  text("Release", 880, 515);
+  if (finished) text("Go Again", 875, 515);
+  else text("Release", 880, 515);
   textSize(20);
   text("Top View", 300, 50);
   text("Side View", 840, 50);
@@ -332,10 +331,6 @@ void draw() {
 
 void release() {
   if (currentWeight < 0) return;
-  if (finished) {
-    weights.get(currentWeight).vel = 0;
-    finished = false;
-  }
   float I = I0;
   for (int i = 0; i < selectedObjects.size(); i++) {
     I += selectedObjects.get(i).inertia();
@@ -365,7 +360,10 @@ void mousePressed() {
 }
 
 void mouseReleased() {
-  HashSet temp = new HashSet(selectedObjects);
+  ArrayList<Obj> temp = new ArrayList<Obj>();
+  for (Obj o : selectedObjects) {
+    if (!temp.contains(o)) temp.add(o);
+  }
   selectedObjects.clear();
   selectedObjects.addAll(temp);
   
@@ -385,8 +383,8 @@ void mouseReleased() {
         yc1 = o.yPos;
         yc2 = o.yPos + o.size;
       }
-      if (xc1 < snapPoints[i][0] && xc2 + o.size > snapPoints[i][0]
-          && yc1 < snapPoints[i][1] && yc2 + o.size > snapPoints[i][1]) {
+      if (xc1 < snapPoints[i][0] && xc2 > snapPoints[i][0]
+          && yc1 < snapPoints[i][1] && yc2 > snapPoints[i][1]) {
         if (o.type == 3) {
           if (snapPoints[i][0] == 50 || snapPoints[i][0] == 250 
               || snapPoints[i][1] == 50 || snapPoints[i][1] == 250) {
@@ -429,7 +427,14 @@ void mouseClicked() {
   if (moving) return;
   if (mouseX >= 860 && mouseX <= 940 
       && mouseY >= 500 && mouseY <= 520) {
-        release();
+        if (finished) {
+          Weight w = weights.get(currentWeight);
+          w.vel = 0;
+          w.xPos = 500;
+          w.yPos = 100;
+          finished = false;
+        }
+        else release();
   }
   
   for (int i = 0; i < weights.size(); i++) {
