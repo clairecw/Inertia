@@ -14,14 +14,18 @@ int[][] snapPoints = new int[][]{
   {150, 250}
 };
 
-ArrayList<Weight> weights = new ArrayList<Weight>();
-float accel = 0;
-int currentWeight = -1;
-int draggedObject = -1;
-ArrayList<Obj> objects = new ArrayList<Obj>();
-ArrayList<Obj> selectedObjects = new ArrayList<Obj>();
-float m = 0;
-float prevTime = 0;
+float accel = 0;        // acceleration of system
+float omega = 0;        // angular velocity of plate
+float angle = 0;        // angular displacement of plate
+
+int currentWeight = -1;      // current hanging mass
+int draggedObject = -1;      // object currently being dragged by user
+
+ArrayList<Weight> weights = new ArrayList<Weight>();    // all hanging masses
+ArrayList<Obj> objects = new ArrayList<Obj>();        // all inertia objects
+ArrayList<Obj> selectedObjects = new ArrayList<Obj>();  // inertia objects currently 
+                                                        // on plate
+float prevTime = 0;      // changing variable for timing the falling mass
 
 // CONSTANTS //
 static float G = 9.81;    // gravitational constant 
@@ -109,20 +113,20 @@ class Obj extends Element {
   void display() {
     switch (type) {
       case 0: 
-        switch ((int)(mass*1000)) {  
-          case 56: 
+        switch ((int)(mass*10000)) {  
+          case 625: 
             fill(54, 255, 41);
             stroke(54, 255, 41);
             break;
-          case 250: 
+          case 2500: 
             fill(255, 41, 56);
             stroke(255, 41, 56);
             break;
-          case 500: 
+          case 5000: 
             fill(44, 41, 255);
             stroke(44, 41, 255);
             break;
-          case 1000:
+          case 10000:
             fill(45, 165, 13);
             stroke(45, 165, 13);
             break;
@@ -154,20 +158,27 @@ class Obj extends Element {
       }
       switch (type) {
         case 0: 
-          switch ((int)(mass*1000)) {  
-            case 56: 
+          switch ((int)(xPos)) {
+            case 50: x = 520; break;
+            case 100: x = 520 + 70; break;
+            case 150: x = 520 + 70*2; break;
+            case 200: x = 520 + 70*3; break;
+            case 250: x = 520 + 70*4; break;
+          }
+          switch ((int)(mass*10000)) {  
+            case 625: 
               fill(54, 255, 41);
               stroke(54, 255, 41);
               break;
-            case 250: 
+            case 2500: 
               fill(255, 41, 56);
               stroke(255, 41, 56);
               break;
-            case 500: 
+            case 5000: 
               fill(44, 41, 255);
               stroke(44, 41, 255);
               break;
-            case 1000:
+            case 10000:
               fill(45, 165, 13);
               stroke(45, 165, 13);
               break;
@@ -239,8 +250,8 @@ void setup() {
   objects.add(ring);
   objects.add(solidSphere);
   objects.add(hollowSphere);
-  objects.add(new Obj(50, 350, 0, 0.25));
-  objects.add(new Obj(90, 350, 0, 0.056));
+  objects.add(new Obj(50, 350, 0, 0.0625));
+  objects.add(new Obj(90, 350, 0, 0.25));
   objects.add(new Obj(130, 350, 0, 0.5));
   objects.add(new Obj(170, 350, 0, 1));
 }
@@ -258,6 +269,13 @@ void draw() {
   text("Solid\nSphere", 35, 460);
   text("Hollow\nSphere", 110, 460);
   text("Ring", 230, 435);
+  text("62.5g", 38, 380);
+  text("250g", 76, 380);
+  text("500g", 115, 380);
+  text("1000g", 155, 380);
+  
+  textSize(12);
+  text("Point Masses", 90, 330);
   
   fill(41, 242, 2);
   stroke(41, 242, 2);
@@ -268,10 +286,12 @@ void draw() {
   ellipse(150, 150, 200, 200);
   
   stroke(255, 0, 0);
-  if (moving) {
-    
-  }
-  else {
+  
+    translate(150, 150);      // put (0, 0) in the middle of the screen
+    //angle = frameCount;    // draw spinning line
+    line(0, 0, 100 * cos(angle), -100 * sin(angle));
+    translate(-150, -150);
+  if (!moving && !finished) {
     line(150, 150, 250, 150);
     fill(0);                    // snap points for objects on the plate
     stroke(0);
@@ -291,11 +311,16 @@ void draw() {
   if (mouseX >= 860 && mouseX <= 940 
       && mouseY >= 500 && mouseY <= 520) fill(200);
   rect(860, 500, 80, 20);
+  fill(255);
+  if (mouseX >= 860 && mouseX <= 940
+      && mouseY >= 530 && mouseY <= 550) fill(200);
+  rect(860, 530, 80, 20);
   
   fill(0);
   textSize(12);
   if (finished) text("Go Again", 875, 515);
   else text("Release", 880, 515);
+  text("Reset", 885, 545);
   textSize(20);
   text("Top View", 300, 50);
   text("Side View", 840, 50);
@@ -323,7 +348,12 @@ void draw() {
     objects.get(i).display();
   }
   
-  if (moving && tick()) weights.get(currentWeight).move();
+  if (moving && tick()) {
+    weights.get(currentWeight).move();
+    float alpha = accel * .25;
+    omega += alpha / 100;
+    angle += omega * .461;
+  }
   for (int i = 0; i < weights.size(); i++) {
     weights.get(i).display();
   }
@@ -334,9 +364,8 @@ void release() {
   float I = I0;
   for (int i = 0; i < selectedObjects.size(); i++) {
     I += selectedObjects.get(i).inertia();
-    //println(selectedObjects.get(i).inertia());
   }
-  m = weights.get(currentWeight).mass/1000;
+  float m = weights.get(currentWeight).mass/1000;
   accel = G*m*R*R/(m*R*R+I);
   moving = true;
   prevTime = millis();
@@ -432,9 +461,29 @@ void mouseClicked() {
           w.vel = 0;
           w.xPos = 500;
           w.yPos = 100;
+          angle = 0;
+          omega = 0;
           finished = false;
         }
         else release();
+  }
+  
+  if (mouseX >= 860 && mouseX <= 940
+      && mouseY >= 530 && mouseY <= 550) {
+        selectedObjects.clear();
+        if (currentWeight > -1) {
+          Weight w = weights.get(currentWeight);
+          w.xPos = w.ogX;
+          w.yPos = w.ogY;
+          w.vel = 0;
+          angle = 0;
+          omega = 0;
+          currentWeight = -1;
+        }
+        for (Obj o : objects) {
+          o.xPos = o.ogX;
+          o.yPos = o.ogY;
+        }
   }
   
   for (int i = 0; i < weights.size(); i++) {
