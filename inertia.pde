@@ -165,6 +165,10 @@ class Obj extends Element {
           case 200: x = 520 + 66*3; break;
           case 250: x = 520 + 66*4; break;
         }
+        if (moving | finished) {
+          //x = 652 + (int)(133*cos(angle));
+          x = 652 + (int)(radius/.00188*cos(angle));
+        }
         switch (type) {
           case 0: 
             switch ((int)(xPos)) {
@@ -173,6 +177,9 @@ class Obj extends Element {
               case 150: x = 520 + 70*2; break;
               case 200: x = 520 + 70*3; break;
               case 250: x = 520 + 70*4; break;
+            }
+            if (moving | finished) {
+              x = 660 + (int)(radius/.00177*cos(angle));
             }
             switch ((int)(mass*10000)) {  
               case 625: 
@@ -466,10 +473,12 @@ void mouseClicked() {
   if (mouseX >= 860 && mouseX <= 940 
       && mouseY >= 500 && mouseY <= 520) {
         if (finished) {
-          Weight w = weights.get(currentWeight);
-          w.vel = 0;
-          w.xPos = 500;
-          w.yPos = 100;
+          if (currentWeight > -1) {
+            Weight w = weights.get(currentWeight);
+            w.vel = 0;
+            w.xPos = 500;
+            w.yPos = 100;
+          }
           angle = 0;
           omega = 0;
           finished = false;
@@ -497,6 +506,7 @@ void mouseClicked() {
           o.xPos = o.ogX;
           o.yPos = o.ogY;
         }
+        finished = false;
   }
   
   for (int i = 0; i < weights.size(); i++) {
