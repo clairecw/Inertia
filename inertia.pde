@@ -96,6 +96,7 @@ class Obj extends Element {
   float inertia;
   float mass;
   float radius;
+  float placedX, placedY;
   
   int type;
   // 0 = point mass
@@ -111,6 +112,14 @@ class Obj extends Element {
   }
   
   void display() {
+    if (selectedObjects.contains(this) && (moving | finished)) {
+      xPos = 150 + (int)(radius/.0025*cos(angle)) - size / 2;
+      yPos = 150 - (int)(radius/.0025*sin(angle)) - size / 2;
+      if (type == 0) {
+        xPos += size / 2;
+        yPos += size / 2;
+      }
+    }
     switch (type) {
       case 0: 
         switch ((int)(mass*10000)) {  
@@ -148,55 +157,55 @@ class Obj extends Element {
         break;
     }
     if (selectedObjects.contains(this) && draggedObject == -1) {
-      int x = 0;
-      switch ((int)(xPos + size/2)) {
-        case 50: x = 520; break;
-        case 100: x = 520 + 66; break;
-        case 150: x = 520 + 66*2; break;
-        case 200: x = 520 + 66*3; break;
-        case 250: x = 520 + 66*4; break;
-      }
-      switch (type) {
-        case 0: 
-          switch ((int)(xPos)) {
-            case 50: x = 520; break;
-            case 100: x = 520 + 70; break;
-            case 150: x = 520 + 70*2; break;
-            case 200: x = 520 + 70*3; break;
-            case 250: x = 520 + 70*4; break;
-          }
-          switch ((int)(mass*10000)) {  
-            case 625: 
-              fill(54, 255, 41);
-              stroke(54, 255, 41);
-              break;
-            case 2500: 
-              fill(255, 41, 56);
-              stroke(255, 41, 56);
-              break;
-            case 5000: 
-              fill(44, 41, 255);
-              stroke(44, 41, 255);
-              break;
-            case 10000:
-              fill(45, 165, 13);
-              stroke(45, 165, 13);
-              break;
-          }
-          ellipse(x, 52, 5, 5);
-          break;
-        case 1:
-          image(solidSphereImg, x, 35, 20, 20);
-          break;
-        case 2:
-          image(hollowSphereImg, x, 35, 20, 20);
-          break;
-        case 3:
-          fill(153, 204, 155);
-          stroke(153, 204, 155);
-          rect(x - 60, 45, 140, 9);
-          break;
-      }
+        int x = 0;
+        switch ((int)(xPos + size/2)) {
+          case 50: x = 520; break;
+          case 100: x = 520 + 66; break;
+          case 150: x = 520 + 66*2; break;
+          case 200: x = 520 + 66*3; break;
+          case 250: x = 520 + 66*4; break;
+        }
+        switch (type) {
+          case 0: 
+            switch ((int)(xPos)) {
+              case 50: x = 520; break;
+              case 100: x = 520 + 70; break;
+              case 150: x = 520 + 70*2; break;
+              case 200: x = 520 + 70*3; break;
+              case 250: x = 520 + 70*4; break;
+            }
+            switch ((int)(mass*10000)) {  
+              case 625: 
+                fill(54, 255, 41);
+                stroke(54, 255, 41);
+                break;
+              case 2500: 
+                fill(255, 41, 56);
+                stroke(255, 41, 56);
+                break;
+              case 5000: 
+                fill(44, 41, 255);
+                stroke(44, 41, 255);
+                break;
+              case 10000:
+                fill(45, 165, 13);
+                stroke(45, 165, 13);
+                break;
+            }
+            ellipse(x, 52, 5, 5);
+            break;
+          case 1:
+            image(solidSphereImg, x, 35, 20, 20);
+            break;
+          case 2:
+            image(hollowSphereImg, x, 35, 20, 20);
+            break;
+          case 3:
+            fill(153, 204, 155);
+            stroke(153, 204, 155);
+            rect(x - 60, 45, 140, 9);
+            break;
+        }
     }
   }
   
@@ -425,12 +434,12 @@ void mouseReleased() {
           }
         }
         if (o.type == 0) {
-          o.xPos = snapPoints[i][0];
-          o.yPos = snapPoints[i][1];
+          o.xPos = o.placedX = snapPoints[i][0];
+          o.yPos = o.placedY = snapPoints[i][1];
         }
         else {
-          o.xPos = snapPoints[i][0] - o.size / 2;
-          o.yPos = snapPoints[i][1] - o.size / 2;
+          o.xPos = o.placedX = snapPoints[i][0] - o.size / 2;
+          o.yPos = o.placedY = snapPoints[i][1] - o.size / 2;
         }
         selectedObjects.add(o);
         o.radius = (snapPoints[i][0] - 150 + snapPoints[i][1] - 150) * 0.0025;
@@ -464,6 +473,10 @@ void mouseClicked() {
           angle = 0;
           omega = 0;
           finished = false;
+          for (Obj o : selectedObjects) {
+            o.xPos = o.placedX;
+            o.yPos = o.placedY;
+          }
         }
         else release();
   }
