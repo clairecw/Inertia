@@ -481,6 +481,7 @@ void mouseReleased() {
         }
         selectedObjects.add(o);
         o.radius = (snapPoints[i][0] - 150 + snapPoints[i][1] - 150) * 0.0025;
+        println(o.radius);
         draggedObject = -1;
         return;
       }
