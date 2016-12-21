@@ -113,8 +113,23 @@ class Obj extends Element {
   
   void display() {
     if (selectedObjects.contains(this) && (moving | finished)) {
-      xPos = 150 + (int)(radius/.0025*cos(angle)) - size / 2;
-      yPos = 150 - (int)(radius/.0025*sin(angle)) - size / 2;
+      float phaseAngle = 0;
+      int comparator = (int)placedY;
+      if (type != 0) comparator += size / 2;
+      switch (comparator) {
+        case 50:
+          phaseAngle = 3.14/2;
+        case 250:
+          phaseAngle = 3*3.14/2;
+          break;
+        case 100:
+          phaseAngle = 3.14/2;
+        case 200:
+          phaseAngle = 3*3.14/2;
+          break;
+      }
+      xPos = 150 + (int)(radius/.0025*cos(angle+phaseAngle)) - size / 2;
+      yPos = 150 - (int)(radius/.0025*sin(angle+phaseAngle)) - size / 2;
       if (type == 0) {
         xPos += size / 2;
         yPos += size / 2;
@@ -157,6 +172,23 @@ class Obj extends Element {
         break;
     }
     if (selectedObjects.contains(this) && draggedObject == -1) {
+      float phaseAngle = 0;
+      int comparator = (int)placedY;
+      if (type != 0) comparator += size / 2;
+      switch (comparator) {
+        case 50:
+          phaseAngle = 3.14/2;
+        case 250:
+          phaseAngle = 3*3.14/2;
+          break;
+        case 100:
+          phaseAngle = 3.14/2;
+        case 200:
+          phaseAngle = 3*3.14/2;
+          break;
+      }
+      
+      
         int x = 0;
         switch ((int)(xPos + size/2)) {
           case 50: x = 520; break;
@@ -166,8 +198,7 @@ class Obj extends Element {
           case 250: x = 520 + 66*4; break;
         }
         if (moving | finished) {
-          //x = 652 + (int)(133*cos(angle));
-          x = 652 + (int)(radius/.00188*cos(angle));
+          x = 652 + (int)(radius/.00188*cos(angle+phaseAngle));
         }
         switch (type) {
           case 0: 
@@ -179,7 +210,7 @@ class Obj extends Element {
               case 250: x = 520 + 70*4; break;
             }
             if (moving | finished) {
-              x = 660 + (int)(radius/.00177*cos(angle));
+              x = 660 + (int)(radius/.00177*cos(angle+phaseAngle));
             }
             switch ((int)(mass*10000)) {  
               case 625: 
