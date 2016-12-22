@@ -481,7 +481,6 @@ void mouseReleased() {
         }
         selectedObjects.add(o);
         o.radius = (snapPoints[i][0] - 150 + snapPoints[i][1] - 150) * 0.0025;
-        println(o.radius);
         draggedObject = -1;
         return;
       }
@@ -490,12 +489,10 @@ void mouseReleased() {
     o.yPos = o.ogY;
     selectedObjects.remove(o);
     for (int i = 0; i < selectedObjects.size(); i++) {
-      print(selectedObjects.get(i).type);
       if (selectedObjects.get(i).xPos == selectedObjects.get(i).ogX
           && selectedObjects.get(i).yPos == selectedObjects.get(i).ogY)
           selectedObjects.remove(i);
     }
-    println();
     draggedObject = -1;
   }
 }
