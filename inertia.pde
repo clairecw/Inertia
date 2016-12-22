@@ -495,7 +495,7 @@ void mouseReleased() {
           selectedObjects.remove(i);
     }
     for (Obj l : selectedObjects) {
-      println(l.type + ", " + l.radius + ", " + l.inertia);
+      println(l.type + ", " + l.radius);
     }
     draggedObject = -1;
   }
