@@ -408,8 +408,17 @@ void draw() {
 
 void release() {
   if (currentWeight < 0) return;
+  
+  ArrayList<Obj> temp = new ArrayList<Obj>();    // remove dupes
+  for (Obj o : selectedObjects) {
+    if (!temp.contains(o)) temp.add(o);
+  }
+  selectedObjects.clear();
+  selectedObjects.addAll(temp);
+  
   float I = I0;
   for (int i = 0; i < selectedObjects.size(); i++) {
+    println(selectedObjects.get(i).inertia());
     I += selectedObjects.get(i).inertia();
   }
   float m = weights.get(currentWeight).mass/1000;
@@ -437,7 +446,7 @@ void mousePressed() {
 }
 
 void mouseReleased() {
-  ArrayList<Obj> temp = new ArrayList<Obj>();
+  ArrayList<Obj> temp = new ArrayList<Obj>();    // remove dupes
   for (Obj o : selectedObjects) {
     if (!temp.contains(o)) temp.add(o);
   }
