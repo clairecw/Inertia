@@ -493,6 +493,9 @@ void mouseReleased() {
           && selectedObjects.get(i).yPos == selectedObjects.get(i).ogY)
           selectedObjects.remove(i);
     }
+    for (Obj l : selectedObjects) {
+      println(l.type + ", " + l.radius);
+    }
     draggedObject = -1;
   }
 }
