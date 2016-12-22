@@ -9,18 +9,18 @@ h3 {
 }
 
 #frame {
-	margin-left: 20%;
-	margin-right: 10%;
-	display: block;
-}
-
-#instr {
-	margin-left: 5%;
+	margin-left: 10%;
 	margin-right: 5%;
 	display: block;
 }
 
-#unselectable {
+.instr {
+	margin-left: 20%;
+	margin-right: 20%;
+	display: block;
+}
+
+.unselectable {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
