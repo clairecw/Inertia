@@ -414,6 +414,7 @@ void release() {
   }
   float m = weights.get(currentWeight).mass/1000;
   accel = G*m*R*R/(m*R*R+I);
+  println(accel);
   moving = true;
   prevTime = millis();
 }
