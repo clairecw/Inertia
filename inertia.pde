@@ -418,12 +418,10 @@ void release() {
   
   float I = I0;
   for (int i = 0; i < selectedObjects.size(); i++) {
-    println(selectedObjects.get(i).inertia());
     I += selectedObjects.get(i).inertia();
   }
   float m = weights.get(currentWeight).mass/1000;
   accel = G*m*R*R/(m*R*R+I);
-  println(accel);
   moving = true;
   prevTime = millis();
 }
@@ -502,9 +500,6 @@ void mouseReleased() {
       if (selectedObjects.get(i).xPos == selectedObjects.get(i).ogX
           && selectedObjects.get(i).yPos == selectedObjects.get(i).ogY)
           selectedObjects.remove(i);
-    }
-    for (Obj l : selectedObjects) {
-      println(l.type + ", " + l.radius);
     }
     draggedObject = -1;
   }
